@@ -188,8 +188,8 @@
                     let filter = searchInput.value.toLowerCase();
                     let filteredData = songData.filter(row => 
                         row["#"].toString().includes(filter) || 
-                        row.Song.toLowerCase().includes(filter) || 
-                        row.Artist.toLowerCase().includes(filter)
+                        (row.Song && row.Song.toLowerCase().includes(filter)) || 
+                        (row.Artist && row.Artist.toLowerCase().includes(filter))
                     );
                     renderTable(filteredData);
                 }, 200);
