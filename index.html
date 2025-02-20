@@ -106,13 +106,32 @@
                 width: 100%;
             }
         }
+
+        #loading-message {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            margin-left: 10px;
+        }
+
+        #loading-image {
+            margin-left: 10px;
+            height: 40px;
+        }
     </style>
 </head>
 <body>
 
     <div id="search-container">
         <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
-        <div id="result-count">Site Loading</div>
+        <div id="result-count">
+            <div id="loading-message">
+                Site Loading
+                <img id="loading-image" src="/attachments/xvXcrB8kvN6cAEcHhWGju.jpeg" alt="Loading Image">
+            </div>
+        </div>
     </div>
 
     <div id="table-container">
@@ -143,7 +162,7 @@
                     filteredData = songData; // Initialize filteredData
                     renderTable(filteredData);
                     // Show total result count
-                    resultCount.innerText = `Songs found: ${filteredData.length}`;
+                    resultCount.innerHTML = `Songs found: ${filteredData.length}`;
                 })
                 .catch(error => {
                     console.error("Error fetching data:", error);
@@ -160,7 +179,7 @@
                 });
 
                 // Update result count
-                resultCount.innerText = `Songs found: ${data.length}`;
+                resultCount.innerHTML = `Songs found: ${data.length}`;
             }
 
             let searchInput = document.getElementById("search");
