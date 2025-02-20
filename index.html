@@ -39,9 +39,11 @@
         }
 
         #result-count {
-            margin-left: 15px;
+            width: 20%;
             font-size: 18px;
             color: white;
+            text-align: right;
+            margin-right: 20px;
         }
 
         #table-container {
@@ -110,7 +112,7 @@
 
     <div id="search-container">
         <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
-        <div id="result-count"></div>
+        <div id="result-count">Site Loading</div>
     </div>
 
     <div id="table-container">
@@ -141,7 +143,7 @@
                     filteredData = songData; // Initialize filteredData
                     renderTable(filteredData);
                     // Show total result count
-                    resultCount.innerText = `Total results: ${filteredData.length}`;
+                    resultCount.innerText = `Songs found: ${filteredData.length}`;
                 })
                 .catch(error => {
                     console.error("Error fetching data:", error);
@@ -158,7 +160,7 @@
                 });
 
                 // Update result count
-                resultCount.innerText = `Results found: ${data.length}`;
+                resultCount.innerText = `Songs found: ${data.length}`;
             }
 
             let searchInput = document.getElementById("search");
