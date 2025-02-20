@@ -24,10 +24,11 @@
             z-index: 1000;
             display: flex;
             justify-content: center;
+            align-items: center;
         }
 
-        input {
-            width: 90%;
+        #search {
+            width: 80%;
             max-width: 600px;
             padding: 10px;
             font-size: 18px;
@@ -35,6 +36,12 @@
             background: white;
             border-radius: 5px;
             text-align: center;
+        }
+
+        #result-count {
+            margin-left: 15px;
+            font-size: 18px;
+            color: white;
         }
 
         #table-container {
@@ -85,18 +92,17 @@
                 font-size: 16px;
             }
 
-            input {
-                width: 100%;
-                font-size: 16px;
+            #search {
+                width: 60%;
+            }
+
+            #result-count {
+                font-size: 14px;
             }
 
             table {
                 width: 100%;
             }
-        }
-
-        #result-count {
-            margin: 10px 0;
         }
     </style>
 </head>
@@ -104,9 +110,8 @@
 
     <div id="search-container">
         <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
+        <div id="result-count"></div>
     </div>
-
-    <div id="result-count"></div>
 
     <div id="table-container">
         <table id="songTable">
