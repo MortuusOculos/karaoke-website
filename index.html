@@ -77,12 +77,10 @@
 
         .sorted-asc .sort-arrow {
             visibility: visible;
-            content: "↓";
         }
 
         .sorted-desc .sort-arrow {
             visibility: visible;
-            content: "↑";
         }
 
         @media (max-width: 600px) {
@@ -123,29 +121,45 @@
     </div>
 
     <script>
+        let songData = []; // Store all songs in memory for efficient filtering
+
         document.addEventListener("DOMContentLoaded", function () {
             let sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
 
             fetch(sheetURL)
                 .then(response => response.json())
                 .then(data => {
-                    let tableBody = document.querySelector("#songTable tbody");
-                    data.forEach(row => {
-                        let tr = document.createElement("tr");
-                        tr.innerHTML = `<td>${row["#"]}</td><td>${row.Song}</td><td>${row.Artist}</td>`;
-                        tableBody.appendChild(tr);
-                    });
+                    songData = data; // Store data globally
+                    renderTable(songData);
                 })
                 .catch(error => console.error("Error fetching data:", error));
 
-            // Live Search
-            document.getElementById("search").addEventListener("input", function () {
-                let filter = this.value.toLowerCase();
-                let rows = document.querySelectorAll("#songTable tbody tr");
-                rows.forEach(row => {
-                    let text = row.innerText.toLowerCase();
-                    row.style.display = text.includes(filter) ? "" : "none";
+            function renderTable(data) {
+                let tableBody = document.querySelector("#songTable tbody");
+                tableBody.innerHTML = ""; // Clear existing rows
+
+                data.forEach(row => {
+                    let tr = document.createElement("tr");
+                    tr.innerHTML = `<td>${row["#"]}</td><td>${row.Song}</td><td>${row.Artist}</td>`;
+                    tableBody.appendChild(tr);
                 });
+            }
+
+            // Optimized Search
+            let searchInput = document.getElementById("search");
+            let debounceTimeout;
+            
+            searchInput.addEventListener("input", function () {
+                clearTimeout(debounceTimeout);
+                debounceTimeout = setTimeout(() => {
+                    let filter = searchInput.value.toLowerCase();
+                    let filteredData = songData.filter(row => 
+                        row["#"].toString().includes(filter) || 
+                        row.Song.toLowerCase().includes(filter) || 
+                        row.Artist.toLowerCase().includes(filter)
+                    );
+                    renderTable(filteredData);
+                }, 200); // Debounce to prevent lag
             });
 
             // Sort on header click
@@ -157,18 +171,15 @@
             });
 
             function sortTable(columnIndex, header) {
-                let table = document.querySelector("#songTable tbody");
-                let rows = Array.from(table.rows);
-                let currentSort = header.getAttribute("data-sort");
-                let ascending = currentSort !== "asc"; // Toggle between asc and desc
+                let ascending = header.getAttribute("data-sort") !== "asc"; // Toggle between asc/desc
 
-                rows.sort((a, b) => {
-                    let textA = a.cells[columnIndex].innerText.trim().toLowerCase();
-                    let textB = b.cells[columnIndex].innerText.trim().toLowerCase();
+                songData.sort((a, b) => {
+                    let textA = Object.values(a)[columnIndex].toString().trim().toLowerCase();
+                    let textB = Object.values(b)[columnIndex].toString().trim().toLowerCase();
                     return ascending ? textA.localeCompare(textB) : textB.localeCompare(textA);
                 });
 
-                rows.forEach(row => table.appendChild(row));
+                renderTable(songData);
                 header.setAttribute("data-sort", ascending ? "asc" : "desc");
 
                 // Reset all headers
