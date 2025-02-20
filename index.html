@@ -60,10 +60,17 @@
 
         th {
             background: black;
+            position: relative;
         }
 
         th:hover {
             background: #555;
+        }
+
+        /* Sort arrow styles */
+        .sort-arrow {
+            margin-left: 8px;
+            font-size: 14px;
         }
 
         @media (max-width: 600px) {
@@ -94,9 +101,9 @@
         <table id="songTable">
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Song</th>
-                    <th>Artist</th>
+                    <th data-index="0"># <span class="sort-arrow"></span></th>
+                    <th data-index="1">Song <span class="sort-arrow"></span></th>
+                    <th data-index="2">Artist <span class="sort-arrow"></span></th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -130,16 +137,18 @@
             });
 
             // Sort on header click
-            document.querySelectorAll("th").forEach((header, index) => {
+            document.querySelectorAll("th").forEach(header => {
                 header.addEventListener("click", function () {
-                    sortTable(index);
+                    let columnIndex = this.getAttribute("data-index");
+                    sortTable(columnIndex, this);
                 });
             });
 
-            function sortTable(columnIndex) {
+            function sortTable(columnIndex, header) {
                 let table = document.querySelector("#songTable tbody");
                 let rows = Array.from(table.rows);
-                let ascending = table.getAttribute("data-sort") !== "asc";
+                let currentSort = header.getAttribute("data-sort");
+                let ascending = currentSort !== "asc"; // Toggle between asc and desc
 
                 rows.sort((a, b) => {
                     let textA = a.cells[columnIndex].innerText.trim().toLowerCase();
@@ -148,7 +157,13 @@
                 });
 
                 rows.forEach(row => table.appendChild(row));
-                table.setAttribute("data-sort", ascending ? "asc" : "desc");
+                header.setAttribute("data-sort", ascending ? "asc" : "desc");
+
+                // Reset all arrows
+                document.querySelectorAll(".sort-arrow").forEach(arrow => arrow.innerText = "");
+                
+                // Set current header arrow
+                header.querySelector(".sort-arrow").innerText = ascending ? "↓" : "↑";
             }
         });
     </script>
