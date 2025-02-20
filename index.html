@@ -27,6 +27,13 @@
             align-items: center;
         }
 
+        #logo {
+            height: 40px;
+            margin-right: 10px;
+            border: 1px solid white;
+            border-radius: 5px;
+        }
+
         #search {
             width: 80%;
             max-width: 600px;
@@ -82,28 +89,28 @@
 
         .sorted-asc .sort-arrow,
         .sorted-desc .sort-arrow {
-            visibility: visible.
+            visibility: visible;
         }
 
         .hide {
-            display: none.
+            display: none;
         }
 
         @media (max-width: 600px) {
             body {
-                font-size: 16px.
+                font-size: 16px;
             }
 
             #search {
-                width: 60%.
+                width: 60%;
             }
 
             #result-count {
-                font-size: 14px.
+                font-size: 14px;
             }
 
             table {
-                width: 100%.
+                width: 100%;
             }
         }
 
@@ -113,18 +120,19 @@
             justify-content: center;
             color: white;
             font-size: 18px;
-            margin-left: 10px.
+            margin-left: 10px;
         }
 
         #loading-image {
             margin-left: 10px;
-            height: 40px.
+            height: 40px;
         }
     </style>
 </head>
 <body>
 
     <div id="search-container">
+        <img id="logo" src="https://www.google.com.au/url?sa=i&url=https%3A%2F%2Fpushworth.com%2F2021%2F03%2F20%2Fkrazy-kathy-karaoke%2F&psig=AOvVaw2579hv3-KiyDNGFyhXnf77&ust=1740116961041000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCJjAp_3G0YsDFQAAAAAdAAAAABAE" alt="Logo">
         <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
         <div id="result-count">
             <div id="loading-message">
