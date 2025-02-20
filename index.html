@@ -126,7 +126,7 @@
     </div>
 
     <!-- Loading Bar -->
-    <div id="loading-bar"></div>
+    <div id="loading-bar" class="hide"></div>
 
     <div id="table-container">
         <table id="songTable">
@@ -142,7 +142,8 @@
     </div>
 
     <script>
-        let songData = []; 
+        let songData = [];
+        let filteredData = [];
 
         document.addEventListener("DOMContentLoaded", function () {
             let sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
@@ -155,7 +156,8 @@
                 .then(response => response.json())
                 .then(data => {
                     songData = data;
-                    renderTable(songData);
+                    filteredData = songData; // Initialize filteredData
+                    renderTable(filteredData);
                     loadingBar.classList.add("hide"); // Hide loading bar after data is fetched
                 })
                 .catch(error => {
@@ -165,7 +167,7 @@
 
             function renderTable(data) {
                 let tableBody = document.querySelector("#songTable tbody");
-                tableBody.innerHTML = ""; 
+                tableBody.innerHTML = "";
 
                 data.forEach(row => {
                     let tr = document.createElement("tr");
@@ -176,12 +178,12 @@
 
             let searchInput = document.getElementById("search");
             let debounceTimeout;
-            
+
             searchInput.addEventListener("input", function () {
                 clearTimeout(debounceTimeout);
                 debounceTimeout = setTimeout(() => {
                     let filter = searchInput.value.toLowerCase();
-                    let filteredData = songData.filter(row => 
+                    filteredData = songData.filter(row => 
                         row["#"].toString().includes(filter) || 
                         (typeof row.Song === 'string' && row.Song.toLowerCase().includes(filter)) || 
                         (typeof row.Artist === 'string' && row.Artist.toLowerCase().includes(filter))
@@ -198,15 +200,15 @@
             });
 
             function sortTable(columnIndex, header) {
-                let ascending = header.getAttribute("data-sort") !== "asc"; 
+                let ascending = header.getAttribute("data-sort") !== "asc";
 
-                songData.sort((a, b) => {
+                filteredData.sort((a, b) => {
                     let textA = Object.values(a)[columnIndex].toString().trim().toLowerCase();
                     let textB = Object.values(b)[columnIndex].toString().trim().toLowerCase();
                     return ascending ? textA.localeCompare(textB) : textB.localeCompare(textA);
                 });
 
-                renderTable(songData);
+                renderTable(filteredData);
                 header.setAttribute("data-sort", ascending ? "asc" : "desc");
 
                 document.querySelectorAll("th").forEach(th => {
