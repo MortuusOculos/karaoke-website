@@ -67,10 +67,22 @@
             background: #555;
         }
 
-        /* Sort arrow styles */
+        /* Sorting arrow styles */
         .sort-arrow {
+            display: inline-block;
             margin-left: 8px;
             font-size: 14px;
+            visibility: hidden;
+        }
+
+        .sorted-asc .sort-arrow {
+            visibility: visible;
+            content: "↓";
+        }
+
+        .sorted-desc .sort-arrow {
+            visibility: visible;
+            content: "↑";
         }
 
         @media (max-width: 600px) {
@@ -101,9 +113,9 @@
         <table id="songTable">
             <thead>
                 <tr>
-                    <th data-index="0"># <span class="sort-arrow"></span></th>
-                    <th data-index="1">Song <span class="sort-arrow"></span></th>
-                    <th data-index="2">Artist <span class="sort-arrow"></span></th>
+                    <th data-index="0"># <span class="sort-arrow">↓</span></th>
+                    <th data-index="1">Song <span class="sort-arrow">↓</span></th>
+                    <th data-index="2">Artist <span class="sort-arrow">↓</span></th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -159,10 +171,14 @@
                 rows.forEach(row => table.appendChild(row));
                 header.setAttribute("data-sort", ascending ? "asc" : "desc");
 
-                // Reset all arrows
-                document.querySelectorAll(".sort-arrow").forEach(arrow => arrow.innerText = "");
-                
+                // Reset all headers
+                document.querySelectorAll("th").forEach(th => {
+                    th.classList.remove("sorted-asc", "sorted-desc");
+                    th.querySelector(".sort-arrow").innerText = "";
+                });
+
                 // Set current header arrow
+                header.classList.add(ascending ? "sorted-asc" : "sorted-desc");
                 header.querySelector(".sort-arrow").innerText = ascending ? "↓" : "↑";
             }
         });
