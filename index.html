@@ -126,7 +126,7 @@
     </div>
 
     <!-- Loading Bar -->
-    <div id="loading-bar" class="hide"></div>
+    <div id="loading-bar"></div>
 
     <div id="table-container">
         <table id="songTable">
@@ -158,11 +158,13 @@
                     songData = data;
                     filteredData = songData; // Initialize filteredData
                     renderTable(filteredData);
-                    loadingBar.classList.add("hide"); // Hide loading bar after data is fetched
+                    // Hide loading bar after data is fetched
+                    loadingBar.classList.add("hide");
                 })
                 .catch(error => {
                     console.error("Error fetching data:", error);
-                    loadingBar.classList.add("hide"); // Hide loading bar even if there's an error
+                    // Hide loading bar even if there's an error
+                    loadingBar.classList.add("hide");
                 });
 
             function renderTable(data) {
