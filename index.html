@@ -13,7 +13,6 @@
             padding: 0; 
         }
 
-        /* Fixed search bar */
         #search-container {
             position: fixed;
             top: 0;
@@ -38,7 +37,6 @@
             text-align: center;
         }
 
-        /* Table container */
         #table-container {
             margin-top: 80px;
         }
@@ -66,7 +64,6 @@
             background: #555;
         }
 
-        /* Sorting arrows */
         .sort-arrow {
             display: inline-block;
             margin-left: 8px;
@@ -79,7 +76,6 @@
             visibility: visible;
         }
 
-        /* Loading bar styles */
         #loading-bar {
             width: 100%;
             height: 5px;
@@ -103,7 +99,6 @@
             100% { left: 100%; }
         }
 
-        /* Hide loading bar when content is loaded */
         .hide {
             display: none;
         }
@@ -126,7 +121,6 @@
 </head>
 <body>
 
-    <!-- Fixed Search Bar -->
     <div id="search-container">
         <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
     </div>
@@ -134,7 +128,6 @@
     <!-- Loading Bar -->
     <div id="loading-bar"></div>
 
-    <!-- Table -->
     <div id="table-container">
         <table id="songTable">
             <thead>
@@ -153,15 +146,17 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             let sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
-
             let loadingBar = document.getElementById("loading-bar");
+
+            // Show loading bar
+            loadingBar.classList.remove("hide");
 
             fetch(sheetURL)
                 .then(response => response.json())
                 .then(data => {
                     songData = data;
                     renderTable(songData);
-                    loadingBar.classList.add("hide"); // Hide loading bar
+                    loadingBar.classList.add("hide"); // Hide loading bar after data is fetched
                 })
                 .catch(error => {
                     console.error("Error fetching data:", error);
