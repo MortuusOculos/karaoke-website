@@ -23,6 +23,11 @@
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             z-index: 1000;
             display: flex;
+        }
+
+        .third {
+            width: 33.33%;
+            display: flex;
             justify-content: center;
             align-items: center;
         }
@@ -30,13 +35,12 @@
         #logo {
             height: 40px; /* Same height as the search bar */
             width: auto;
-            margin-right: 10px;
             border: 1px solid white;
             border-radius: 5px;
         }
 
         #search {
-            width: 80%;
+            width: 100%;
             max-width: 600px;
             padding: 10px;
             font-size: 18px;
@@ -47,11 +51,9 @@
         }
 
         #result-count {
-            width: 20%;
             font-size: 18px;
             color: white;
-            text-align: right;
-            margin-left: 10px;
+            text-align: center;
         }
 
         #table-container {
@@ -103,7 +105,7 @@
             }
 
             #search {
-                width: 60%;
+                width: 100%;
             }
 
             #result-count {
@@ -134,12 +136,18 @@
 <body>
 
     <div id="search-container">
-        <img id="logo" src="https://raw.githubusercontent.com/MortuusOculos/karaoke-website/main/KKKpic.jpg" alt="Logo">
-        <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
-        <div id="result-count">
-            <div id="loading-message">
-                Site Loading
-                <img id="loading-image" src="https://scontent.fbne5-1.fna.fbcdn.net/v/t39.30808-6/209408372_1820123368169125_4693824571774407942_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=c3XlfSTqUbYQ7kNvgE8bY4H&_nc_oc=AdifabvrWlQSURGwlXfzjnKYvKK2S4g3S6eCwrTmpJTQFi6frv6NVRRglwGqGhVuSwE&_nc_zt=23&_nc_ht=scontent.fbne5-1.fna&_nc_gid=AA9fiXs4ZHd3wB8ubWyYPhz&oh=00_AYCP4aiOzM3YPcctOiTBnAEvyGk3S_mVJHz8xr-A869MaQ&oe=67BC78EF" alt="Loading Image">
+        <div class="third">
+            <img id="logo" src="https://raw.githubusercontent.com/MortuusOculos/karaoke-website/main/KKKpic.jpg" alt="Logo">
+        </div>
+        <div class="third">
+            <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
+        </div>
+        <div class="third">
+            <div id="result-count">
+                <div id="loading-message">
+                    Site Loading
+                    <img id="loading-image" src="https://scontent.fbne5-1.fna.fbcdn.net/v/t39.30808-6/209408372_1820123368169125_4693824571774407942_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=c3XlfSTqUbYQ7kNvgE8bY4H&_nc_oc=AdifabvrWlQSURGwlXfzjnKYvKK2S4g3S6eCwrTmpJTQFi6frv6NVRRglwGqGhVuSwE&_nc_zt=23&_nc_ht=scontent.fbne5-1.fna&_nc_gid=AA9fiXs4ZHd3wB8ubWyYPhz&oh=00_AYCP4aiOzM3YPcctOiTBnAEvyGk3S_mVJHz8xr-A869MaQ&oe=67BC78EF" alt="Loading Image">
+                </div>
             </div>
         </div>
     </div>
