@@ -12,7 +12,7 @@
             margin: 0; 
             padding: 0; 
         }
-        
+
         /* Fixed search bar container with pink background */
         #search-container {
             position: fixed;
@@ -26,7 +26,7 @@
             display: flex;
             justify-content: center;
         }
-        
+
         /* White search bar */
         input {
             width: 90%;
@@ -37,6 +37,11 @@
             background: white;
             border-radius: 5px;
             text-align: center;
+        }
+
+        /* Sort buttons */
+        #sort-buttons {
+            margin-top: 50px;
         }
 
         /* Push table down to prevent overlap */
@@ -60,6 +65,21 @@
         th {
             background: black;
         }
+
+        @media (max-width: 600px) {
+            body {
+                font-size: 16px;
+            }
+
+            input {
+                width: 100%;
+                font-size: 16px;
+            }
+
+            table {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -67,6 +87,11 @@
     <!-- Fixed Search Bar -->
     <div id="search-container">
         <input type="text" id="search" placeholder="Search by Song Number, Song Name or Artist">
+    </div>
+
+    <!-- Sort Buttons -->
+    <div id="sort-buttons">
+        <button onclick="sortTable(2)">Sort by Artist A-Z</button>
     </div>
 
     <!-- Table -->
@@ -107,6 +132,13 @@
                 row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
             });
         });
+
+        function sortTable(columnIndex) {
+            let table = document.querySelector("table");
+            let rows = Array.from(table.rows).slice(1); // Skip header row
+            rows.sort((a, b) => a.cells[columnIndex].innerText.localeCompare(b.cells[columnIndex].innerText));
+            rows.forEach(row => table.appendChild(row));
+        }
     </script>
 
 </body>
