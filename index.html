@@ -204,11 +204,20 @@
             function sortTable(columnIndex, header) {
                 let ascending = header.getAttribute("data-sort") !== "asc";
 
-                filteredData.sort((a, b) => {
-                    let textA = Object.values(a)[columnIndex].toString().trim().toLowerCase();
-                    let textB = Object.values(b)[columnIndex].toString().trim().toLowerCase();
-                    return ascending ? textA.localeCompare(textB) : textB.localeCompare(textA);
-                });
+                // Sort numerically if column is #
+                if (columnIndex == 0) {
+                    filteredData.sort((a, b) => {
+                        let numA = parseInt(a["#"], 10);
+                        let numB = parseInt(b["#"], 10);
+                        return ascending ? numA - numB : numB - numA;
+                    });
+                } else {
+                    filteredData.sort((a, b) => {
+                        let textA = Object.values(a)[columnIndex].toString().trim().toLowerCase();
+                        let textB = Object.values(b)[columnIndex].toString().trim().toLowerCase();
+                        return ascending ? textA.localeCompare(textB) : textB.localeCompare(textA);
+                    });
+                }
 
                 renderTable(filteredData);
                 header.setAttribute("data-sort", ascending ? "asc" : "desc");
