@@ -13,7 +13,7 @@
             padding: 0; 
         }
 
-        /* Fixed search bar container with pink background */
+        /* Fixed search bar container */
         #search-container {
             position: fixed;
             top: 0;
@@ -39,11 +39,6 @@
             text-align: center;
         }
 
-        /* Sort buttons */
-        #sort-buttons {
-            margin-top: 50px;
-        }
-
         /* Push table down to prevent overlap */
         #table-container {
             margin-top: 80px;
@@ -60,10 +55,15 @@
         th, td {
             padding: 10px;
             border: 1px solid white;
+            cursor: pointer;
         }
 
         th {
             background: black;
+        }
+
+        th:hover {
+            background: #555;
         }
 
         @media (max-width: 600px) {
@@ -86,17 +86,12 @@
 
     <!-- Fixed Search Bar -->
     <div id="search-container">
-        <input type="text" id="search" placeholder="Search by Song Number, Song Name or Artist">
-    </div>
-
-    <!-- Sort Buttons -->
-    <div id="sort-buttons">
-        <button onclick="sortTable(2)">Sort by Artist A-Z</button>
+        <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
     </div>
 
     <!-- Table -->
     <div id="table-container">
-        <table>
+        <table id="songTable">
             <thead>
                 <tr>
                     <th>#</th>
@@ -104,41 +99,58 @@
                     <th>Artist</th>
                 </tr>
             </thead>
-            <tbody id="songTable"></tbody>
+            <tbody></tbody>
         </table>
     </div>
 
     <script>
-        let sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
+        document.addEventListener("DOMContentLoaded", function () {
+            let sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
 
-        fetch(sheetURL)
-            .then(response => response.json())
-            .then(data => {
-                let table = document.getElementById("songTable");
-                data.forEach(row => {
-                    let tr = document.createElement("tr");
-                    tr.innerHTML = `<td>${row["#"]}</td><td>${row.Song}</td><td>${row.Artist}</td>`;
-                    table.appendChild(tr);
+            fetch(sheetURL)
+                .then(response => response.json())
+                .then(data => {
+                    let tableBody = document.querySelector("#songTable tbody");
+                    data.forEach(row => {
+                        let tr = document.createElement("tr");
+                        tr.innerHTML = `<td>${row["#"]}</td><td>${row.Song}</td><td>${row.Artist}</td>`;
+                        tableBody.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error("Error fetching data:", error));
+
+            // Live Search
+            document.getElementById("search").addEventListener("input", function () {
+                let filter = this.value.toLowerCase();
+                let rows = document.querySelectorAll("#songTable tbody tr");
+                rows.forEach(row => {
+                    let text = row.innerText.toLowerCase();
+                    row.style.display = text.includes(filter) ? "" : "none";
                 });
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
             });
 
-        document.getElementById("search").addEventListener("input", function () {
-            let filter = this.value.toLowerCase();
-            let rows = document.querySelectorAll("#songTable tr");
-            rows.forEach(row => {
-                row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
+            // Sort on header click
+            document.querySelectorAll("th").forEach((header, index) => {
+                header.addEventListener("click", function () {
+                    sortTable(index);
+                });
             });
+
+            function sortTable(columnIndex) {
+                let table = document.querySelector("#songTable tbody");
+                let rows = Array.from(table.rows);
+                let ascending = table.getAttribute("data-sort") !== "asc";
+
+                rows.sort((a, b) => {
+                    let textA = a.cells[columnIndex].innerText.trim().toLowerCase();
+                    let textB = b.cells[columnIndex].innerText.trim().toLowerCase();
+                    return ascending ? textA.localeCompare(textB) : textB.localeCompare(textA);
+                });
+
+                rows.forEach(row => table.appendChild(row));
+                table.setAttribute("data-sort", ascending ? "asc" : "desc");
+            }
         });
-
-        function sortTable(columnIndex) {
-            let table = document.querySelector("table");
-            let rows = Array.from(table.rows).slice(1); // Skip header row
-            rows.sort((a, b) => a.cells[columnIndex].innerText.localeCompare(b.cells[columnIndex].innerText));
-            rows.forEach(row => table.appendChild(row));
-        }
     </script>
 
 </body>
