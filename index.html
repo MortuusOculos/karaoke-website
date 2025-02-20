@@ -76,29 +76,6 @@
             visibility: visible;
         }
 
-        #loading-bar {
-            width: 100%;
-            height: 5px;
-            background: #ccc;
-            position: relative;
-            overflow: hidden;
-            display: block;
-        }
-
-        #loading-bar::before {
-            content: "";
-            position: absolute;
-            width: 50%;
-            height: 100%;
-            background: white;
-            animation: loading-animation 1.5s infinite linear;
-        }
-
-        @keyframes loading-animation {
-            0% { left: -50%; }
-            100% { left: 100%; }
-        }
-
         .hide {
             display: none;
         }
@@ -129,9 +106,6 @@
         <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
     </div>
 
-    <!-- Loading Bar -->
-    <div id="loading-bar"></div>
-
     <div id="result-count"></div>
 
     <div id="table-container">
@@ -153,11 +127,7 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             let sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
-            let loadingBar = document.getElementById("loading-bar");
             let resultCount = document.getElementById("result-count");
-
-            // Show loading bar
-            loadingBar.classList.remove("hide");
 
             fetch(sheetURL)
                 .then(response => response.json())
@@ -165,15 +135,11 @@
                     songData = data;
                     filteredData = songData; // Initialize filteredData
                     renderTable(filteredData);
-                    // Hide loading bar after data is fetched
-                    loadingBar.classList.add("hide");
                     // Show total result count
                     resultCount.innerText = `Total results: ${filteredData.length}`;
                 })
                 .catch(error => {
                     console.error("Error fetching data:", error);
-                    // Hide loading bar even if there's an error
-                    loadingBar.classList.add("hide");
                 });
 
             function renderTable(data) {
