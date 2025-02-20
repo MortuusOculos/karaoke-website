@@ -13,7 +13,7 @@
             padding: 0; 
         }
 
-        /* Fixed search bar container */
+        /* Fixed search bar */
         #search-container {
             position: fixed;
             top: 0;
@@ -27,7 +27,6 @@
             justify-content: center;
         }
 
-        /* White search bar */
         input {
             width: 90%;
             max-width: 600px;
@@ -39,7 +38,7 @@
             text-align: center;
         }
 
-        /* Push table down to prevent overlap */
+        /* Table container */
         #table-container {
             margin-top: 80px;
         }
@@ -67,7 +66,7 @@
             background: #555;
         }
 
-        /* Sorting arrow styles */
+        /* Sorting arrows */
         .sort-arrow {
             display: inline-block;
             margin-left: 8px;
@@ -75,12 +74,38 @@
             visibility: hidden;
         }
 
-        .sorted-asc .sort-arrow {
+        .sorted-asc .sort-arrow,
+        .sorted-desc .sort-arrow {
             visibility: visible;
         }
 
-        .sorted-desc .sort-arrow {
-            visibility: visible;
+        /* Loading bar styles */
+        #loading-bar {
+            width: 100%;
+            height: 5px;
+            background: #ccc;
+            position: relative;
+            overflow: hidden;
+            display: block;
+        }
+
+        #loading-bar::before {
+            content: "";
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            background: white;
+            animation: loading-animation 1.5s infinite linear;
+        }
+
+        @keyframes loading-animation {
+            0% { left: -50%; }
+            100% { left: 100%; }
+        }
+
+        /* Hide loading bar when content is loaded */
+        .hide {
+            display: none;
         }
 
         @media (max-width: 600px) {
@@ -106,6 +131,9 @@
         <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
     </div>
 
+    <!-- Loading Bar -->
+    <div id="loading-bar"></div>
+
     <!-- Table -->
     <div id="table-container">
         <table id="songTable">
@@ -121,22 +149,28 @@
     </div>
 
     <script>
-        let songData = []; // Store all songs in memory for efficient filtering
+        let songData = []; 
 
         document.addEventListener("DOMContentLoaded", function () {
             let sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
 
+            let loadingBar = document.getElementById("loading-bar");
+
             fetch(sheetURL)
                 .then(response => response.json())
                 .then(data => {
-                    songData = data; // Store data globally
+                    songData = data;
                     renderTable(songData);
+                    loadingBar.classList.add("hide"); // Hide loading bar
                 })
-                .catch(error => console.error("Error fetching data:", error));
+                .catch(error => {
+                    console.error("Error fetching data:", error);
+                    loadingBar.classList.add("hide"); // Hide loading bar even if there's an error
+                });
 
             function renderTable(data) {
                 let tableBody = document.querySelector("#songTable tbody");
-                tableBody.innerHTML = ""; // Clear existing rows
+                tableBody.innerHTML = ""; 
 
                 data.forEach(row => {
                     let tr = document.createElement("tr");
@@ -145,7 +179,6 @@
                 });
             }
 
-            // Optimized Search
             let searchInput = document.getElementById("search");
             let debounceTimeout;
             
@@ -159,10 +192,9 @@
                         row.Artist.toLowerCase().includes(filter)
                     );
                     renderTable(filteredData);
-                }, 200); // Debounce to prevent lag
+                }, 200);
             });
 
-            // Sort on header click
             document.querySelectorAll("th").forEach(header => {
                 header.addEventListener("click", function () {
                     let columnIndex = this.getAttribute("data-index");
@@ -171,7 +203,7 @@
             });
 
             function sortTable(columnIndex, header) {
-                let ascending = header.getAttribute("data-sort") !== "asc"; // Toggle between asc/desc
+                let ascending = header.getAttribute("data-sort") !== "asc"; 
 
                 songData.sort((a, b) => {
                     let textA = Object.values(a)[columnIndex].toString().trim().toLowerCase();
@@ -182,13 +214,11 @@
                 renderTable(songData);
                 header.setAttribute("data-sort", ascending ? "asc" : "desc");
 
-                // Reset all headers
                 document.querySelectorAll("th").forEach(th => {
                     th.classList.remove("sorted-asc", "sorted-desc");
                     th.querySelector(".sort-arrow").innerText = "";
                 });
 
-                // Set current header arrow
                 header.classList.add(ascending ? "sorted-asc" : "sorted-desc");
                 header.querySelector(".sort-arrow").innerText = ascending ? "↓" : "↑";
             }
