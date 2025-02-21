@@ -135,4 +135,131 @@
 </head>
 <body>
 
-    <div
+    <div id="search-container">
+        <div class="third">
+            <img id="logo" src="https://raw.githubusercontent.com/MortuusOculos/karaoke-website/main/KKKpic.jpg" alt="Logo">
+        </div>
+        <div class="third">
+            <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
+        </div>
+        <div class="third">
+            <div id="result-count">
+                <div id="loading-message">
+                    Site Loading
+                    <img id="loading-image" src="https://scontent.fbne5-1.fna.fbcdn.net/v/t39.30808-6/209408372_1820123368169125_4693824571774407942_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=c3XlfSTqUbYQ7kNvgE8bY4H&_nc_oc=AdifabvrWlQSURGwlXfzjnKYvKK2S4g3S6eCwrTmpJTQFi6frv6NVRRglwGqGhVuSwE&_nc_zt=23&_nc_ht=scontent.fbne5-1.fna&_nc_gid=AA9fiXs4ZHd3wB8ubWyYPhz&oh=00_AYCP4aiOzM3YPcctOiTBnAEvyGk3S_mVJHz8xr-A869MaQ&oe=67BC78EF" alt="Loading Image">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="table-container">
+        <table id="songTable">
+            <thead>
+                <tr>
+                    <th data-index="0"># <span class="sort-arrow">↓</span></th>
+                    <th data-index="1">Song <span class="sort-arrow">↓</span></th>
+                    <th data-index="2">Artist <span class="sort-arrow">↓</span></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        let songData = [];
+        let filteredData = [];
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
+            const resultCount = document.getElementById("result-count");
+
+            // Check if data is already in localStorage
+            const cachedData = localStorage.getItem('songData');
+            if (cachedData) {
+                songData = JSON.parse(cachedData);
+                filteredData = songData;
+                renderTable(filteredData);
+            } else {
+                // Fetch data and cache it
+                fetch(sheetURL)
+                    .then(response => response.json())
+                    .then(data => {
+                        songData = data;
+                        filteredData = songData;
+                        renderTable(filteredData);
+                        localStorage.setItem('songData', JSON.stringify(songData));
+                    })
+                    .catch(error => {
+                        console.error("Error fetching data:", error);
+                    });
+            }
+
+            function renderTable(data) {
+                const tableBody = document.querySelector("#songTable tbody");
+                tableBody.innerHTML = "";
+
+                data.forEach(row => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `<td>${row["#"]}</td><td>${row.Song}</td><td>${row.Artist}</td>`;
+                    tableBody.appendChild(tr);
+                });
+
+                resultCount.innerHTML = `Songs found: ${data.length}`;
+            }
+
+            let debounceTimeout;
+            const searchInput = document.getElementById("search");
+
+            searchInput.addEventListener("input", function () {
+                clearTimeout(debounceTimeout);
+                debounceTimeout = setTimeout(() => {
+                    const filter = searchInput.value.toLowerCase();
+                    filteredData = songData.filter(row => 
+                        row["#"].toString().includes(filter) || 
+                        (typeof row.Song === 'string' && row.Song.toLowerCase().includes(filter)) || 
+                        (typeof row.Artist === 'string' && row.Artist.toLowerCase().includes(filter))
+                    );
+                    renderTable(filteredData);
+                }, 200);
+            });
+
+            document.querySelectorAll("th").forEach(header => {
+                header.addEventListener("click", function () {
+                    const columnIndex = this.getAttribute("data-index");
+                    sortTable(columnIndex, this);
+                });
+            });
+
+            function sortTable(columnIndex, header) {
+                const ascending = header.getAttribute("data-sort") !== "asc";
+
+                if (columnIndex == 0) {
+                    filteredData.sort((a, b) => {
+                        const numA = parseInt(a["#"], 10);
+                        const numB = parseInt(b["#"], 10);
+                        return ascending ? numA - numB : numB - numA;
+                    });
+                } else {
+                    filteredData.sort((a, b) => {
+                        const textA = Object.values(a)[columnIndex].toString().trim().toLowerCase();
+                        const textB = Object.values(b)[columnIndex].toString().trim().toLowerCase();
+                        return ascending ? textA.localeCompare(textB) : textB.localeCompare(textA);
+                    });
+                }
+
+                renderTable(filteredData);
+                header.setAttribute("data-sort", ascending ? "asc" : "desc");
+
+                document.querySelectorAll("th").forEach(th => {
+                    th.classList.remove("sorted-asc", "sorted-desc");
+                    th.querySelector(".sort-arrow").innerText = "";
+                });
+
+                header.classList.add(ascending ? "sorted-asc" : "sorted-desc");
+                header.querySelector(".sort-arrow").innerText = ascending ? "↓" : "↑";
+            }
+        });
+    </script>
+
+</body>
+</html>
