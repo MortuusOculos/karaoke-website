@@ -170,43 +170,50 @@
         let filteredData = [];
 
         document.addEventListener("DOMContentLoaded", function () {
-            let sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
-            let resultCount = document.getElementById("result-count");
+            const sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
+            const resultCount = document.getElementById("result-count");
 
-            fetch(sheetURL)
-                .then(response => response.json())
-                .then(data => {
-                    songData = data;
-                    filteredData = songData; // Initialize filteredData
-                    renderTable(filteredData);
-                    // Show total result count
-                    resultCount.innerHTML = `Songs found: ${filteredData.length}`;
-                })
-                .catch(error => {
-                    console.error("Error fetching data:", error);
-                });
+            // Check if data is already in localStorage
+            const cachedData = localStorage.getItem('songData');
+            if (cachedData) {
+                songData = JSON.parse(cachedData);
+                filteredData = songData;
+                renderTable(filteredData);
+            } else {
+                // Fetch data and cache it
+                fetch(sheetURL)
+                    .then(response => response.json())
+                    .then(data => {
+                        songData = data;
+                        filteredData = songData;
+                        renderTable(filteredData);
+                        localStorage.setItem('songData', JSON.stringify(songData));
+                    })
+                    .catch(error => {
+                        console.error("Error fetching data:", error);
+                    });
+            }
 
             function renderTable(data) {
-                let tableBody = document.querySelector("#songTable tbody");
+                const tableBody = document.querySelector("#songTable tbody");
                 tableBody.innerHTML = "";
 
                 data.forEach(row => {
-                    let tr = document.createElement("tr");
+                    const tr = document.createElement("tr");
                     tr.innerHTML = `<td>${row["#"]}</td><td>${row.Song}</td><td>${row.Artist}</td>`;
                     tableBody.appendChild(tr);
                 });
 
-                // Update result count
                 resultCount.innerHTML = `Songs found: ${data.length}`;
             }
 
-            let searchInput = document.getElementById("search");
             let debounceTimeout;
+            const searchInput = document.getElementById("search");
 
             searchInput.addEventListener("input", function () {
                 clearTimeout(debounceTimeout);
                 debounceTimeout = setTimeout(() => {
-                    let filter = searchInput.value.toLowerCase();
+                    const filter = searchInput.value.toLowerCase();
                     filteredData = songData.filter(row => 
                         row["#"].toString().includes(filter) || 
                         (typeof row.Song === 'string' && row.Song.toLowerCase().includes(filter)) || 
@@ -218,25 +225,24 @@
 
             document.querySelectorAll("th").forEach(header => {
                 header.addEventListener("click", function () {
-                    let columnIndex = this.getAttribute("data-index");
+                    const columnIndex = this.getAttribute("data-index");
                     sortTable(columnIndex, this);
                 });
             });
 
             function sortTable(columnIndex, header) {
-                let ascending = header.getAttribute("data-sort") !== "asc";
+                const ascending = header.getAttribute("data-sort") !== "asc";
 
-                // Sort numerically if column is #
                 if (columnIndex == 0) {
                     filteredData.sort((a, b) => {
-                        let numA = parseInt(a["#"], 10);
-                        let numB = parseInt(b["#"], 10);
+                        const numA = parseInt(a["#"], 10);
+                        const numB = parseInt(b["#"], 10);
                         return ascending ? numA - numB : numB - numA;
                     });
                 } else {
                     filteredData.sort((a, b) => {
-                        let textA = Object.values(a)[columnIndex].toString().trim().toLowerCase();
-                        let textB = Object.values(b)[columnIndex].toString().trim().toLowerCase();
+                        const textA = Object.values(a)[columnIndex].toString().trim().toLowerCase();
+                        const textB = Object.values(b)[columnIndex].toString().trim().toLowerCase();
                         return ascending ? textA.localeCompare(textB) : textB.localeCompare(textA);
                     });
                 }
