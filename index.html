@@ -50,9 +50,12 @@
             text-align: center;
         }
 
-        #result-count {
-            font-size: 18px;
-            color: white;
+        #hire-us {
+            font-size: 20px;
+            color: yellow; /* Eye-catching color */
+            font-weight: bold;
+            text-shadow: 2px 2px black;
+            cursor: pointer;
             text-align: center;
         }
 
@@ -116,21 +119,6 @@
                 width: 100%;
             }
         }
-
-        #loading-message {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 18px;
-            margin-left: 10px;
-        }
-
-        #loading-image {
-            height: 40px; /* Same height as the search bar */
-            width: auto;
-            margin-left: 10px;
-        }
     </style>
 </head>
 <body>
@@ -143,11 +131,8 @@
             <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
         </div>
         <div class="third">
-            <div id="result-count">
-                <div id="loading-message">
-                    Site Loading
-                    <img id="loading-image" src="https://scontent.fbne5-1.fna.fbcdn.net/v/t39.30808-6/209408372_1820123368169125_4693824571774407942_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=c3XlfSTqUbYQ7kNvgE8bY4H&_nc_oc=AdifabvrWlQSURGwlXfzjnKYvKK2S4g3S6eCwrTmpJTQFi6frv6NVRRglwGqGhVuSwE&_nc_zt=23&_nc_ht=scontent.fbne5-1.fna&_nc_gid=AA9fiXs4ZHd3wB8ubWyYPhz&oh=00_AYCP4aiOzM3YPcctOiTBnAEvyGk3S_mVJHz8xr-A869MaQ&oe=67BC78EF" alt="Loading Image">
-                </div>
+            <div id="hire-us" onclick="window.location.href = 'hire.html';">
+                Hire Us!
             </div>
         </div>
     </div>
@@ -171,7 +156,6 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             const sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
-            const resultCount = document.getElementById("result-count");
 
             // Check if data is already in localStorage
             const cachedData = localStorage.getItem('songData');
@@ -203,8 +187,6 @@
                     tr.innerHTML = `<td>${row["#"]}</td><td>${row.Song}</td><td>${row.Artist}</td>`;
                     tableBody.appendChild(tr);
                 });
-
-                resultCount.innerHTML = `Songs found: ${data.length}`;
             }
 
             let debounceTimeout;
