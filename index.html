@@ -192,7 +192,7 @@
       function initFuse(data) {
         fuse = new Fuse(data, {
           keys: ['#', 'Song', 'Artist'],
-          threshold: 0.3,
+          threshold: 0.35, // Slightly higher threshold for more forgiving search
           ignoreLocation: true,
           includeScore: true
         });
@@ -209,9 +209,11 @@
       }
 
       const searchInput = document.getElementById("search");
-      const spellingSuggestion = document.getElementById("spellingSuggestion");
-      const songTitleSuggestion = document.getElementById("songTitleSuggestion");
-      const artistNameSuggestion = document.getElementById("artistNameSuggestion");
+      const feedbackMessages = [
+        "That’s not on the list, mate! Try again.",
+        "Have another crack at it, legend!",
+        "Nothing found—blame the bartender?"
+      ];
 
       function performSearch(query) {
         const term = query.trim().toLowerCase();
@@ -225,10 +227,8 @@
         if (results.length > 0) {
           filteredData = results.map(r => r.item);
           renderTable(filteredData);
-
-          const suggested = results[0].item;
-          spellingSuggestion.innerHTML = `Did you mean? <strong>${suggested.Song}</strong>`;
-          artistNameSuggestion.innerHTML = suggested.Artist ? `Artist match: <strong>${suggested.Artist}</strong>` : '';
+        } else {
+          document.getElementById("spellingSuggestion").innerText = feedbackMessages[Math.floor(Math.random() * feedbackMessages.length)];
         }
       }
 
