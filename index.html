@@ -148,6 +148,17 @@
 
       let songData = JSON.parse(localStorage.getItem("songData")) || [];
       let fuse;
+      let debounceTimer;
+
+      const feedbackMessages = [
+        "Oops! Either that song doesn’t exist or you’ve discovered a new genre: Invisible Music.",
+        "Nada! Maybe the song is hiding.",
+        "No results, champ. Maybe it's time to invent your own lyrics?",
+        "Looks like you’ve requested a song that exists only in your imagination!",
+        "This song must be exclusive to rock gods only!",
+        "You’re ahead of the times, mate—try a song that actually exists.",
+        "That track is on a secret VIP list somewhere, just not here!"
+      ];
 
       if (songData.length > 0) {
         renderTable(songData);
@@ -181,26 +192,28 @@
 
       initFuse(songData);
 
+      function debounceSearch(callback, delay) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(callback, delay);
+      }
+
       searchInput.addEventListener("input", () => {
-        const term = searchInput.value.trim().toLowerCase();
-        feedbackMessage.innerText = "";
+        debounceSearch(() => {
+          const term = searchInput.value.trim().toLowerCase();
+          feedbackMessage.innerText = "";
 
-        if (!term) {
-          renderTable(songData);
-          return;
-        }
+          if (!term) {
+            renderTable(songData);
+            return;
+          }
 
-        const results = fuse.search(term);
-        if (results.length > 0) {
-          renderTable(results.map(r => r.item));
-        } else {
-          const feedbackMessages = [
-            "Oops! Either that song doesn’t exist or you’ve discovered a new genre: Invisible Music.",
-            "Nada! Maybe the song is hiding.",
-            "No results, champ. Maybe it's time to invent your own lyrics?"
-          ];
-          feedbackMessage.innerText = feedbackMessages[Math.floor(Math.random() * feedbackMessages.length)];
-        }
+          const results = fuse.search(term);
+          if (results.length > 0) {
+            renderTable(results.map(r => r.item));
+          } else {
+            feedbackMessage.innerText = feedbackMessages[Math.floor(Math.random() * feedbackMessages.length)];
+          }
+        }, 300);
       });
     });
   </script>
