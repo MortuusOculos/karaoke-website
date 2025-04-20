@@ -80,7 +80,7 @@
     }
 
     #table-container {
-      margin-top: 140px;
+      margin-top: 180px;
     }
 
     table {
@@ -148,7 +148,8 @@
       </div>
     </div>
     <div class="suggestion-box" id="spellingSuggestion"></div>
-    <div class="suggestion-box" id="songArtistSuggestion"></div>
+    <div class="suggestion-box" id="songTitleSuggestion"></div>
+    <div class="suggestion-box" id="artistNameSuggestion"></div>
   </div>
 
   <div id="table-container">
@@ -165,14 +166,12 @@
   </div>
 
   <script>
-    let songData = [];
-    let filteredData = [];
-    let fuse;
+    let songData = [], filteredData = [], fuse;
 
     document.addEventListener("DOMContentLoaded", function () {
       const sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
-
       const cachedData = localStorage.getItem('songData');
+
       if (cachedData) {
         songData = JSON.parse(cachedData);
         initFuse(songData);
@@ -180,20 +179,19 @@
         renderTable(filteredData);
       } else {
         fetch(sheetURL)
-          .then(response => response.json())
+          .then(res => res.json())
           .then(data => {
             songData = data;
             localStorage.setItem('songData', JSON.stringify(songData));
             initFuse(songData);
             filteredData = songData;
             renderTable(filteredData);
-          })
-          .catch(error => console.error("Error fetching data:", error));
+          });
       }
 
       function initFuse(data) {
         fuse = new Fuse(data, {
-          keys: ["#", "Song", "Artist"],
+          keys: ['#', 'Song', 'Artist'],
           threshold: 0.3,
           ignoreLocation: true,
           includeScore: true
@@ -210,103 +208,87 @@
         });
       }
 
-      let debounceTimeout;
       const searchInput = document.getElementById("search");
       const spellingSuggestion = document.getElementById("spellingSuggestion");
-      const songArtistSuggestion = document.getElementById("songArtistSuggestion");
+      const songTitleSuggestion = document.getElementById("songTitleSuggestion");
+      const artistNameSuggestion = document.getElementById("artistNameSuggestion");
+      let debounceTimeout;
 
       function performSearch(query) {
-        const filter = query.trim().toLowerCase();
-        if (!filter) {
+        const term = query.trim().toLowerCase();
+        if (!term) {
           filteredData = songData;
           renderTable(filteredData);
-          spellingSuggestion.innerText = '';
-          songArtistSuggestion.innerText = '';
+          spellingSuggestion.innerText = songTitleSuggestion.innerText = artistNameSuggestion.innerText = '';
           return;
         }
 
-        const results = fuse.search(filter);
+        const results = fuse.search(term);
+        const isFuzzy = results.length > 0 && results[0].score > 0.001;
 
         if (results.length > 0) {
           filteredData = results.map(r => r.item);
           renderTable(filteredData);
 
-          const topSpelling = results[0].item;
-          const exactMatch = topSpelling["#"].toString().toLowerCase() === filter ||
-                             topSpelling.Song.toLowerCase() === filter ||
-                             topSpelling.Artist.toLowerCase() === filter;
+          const suggested = results[0].item;
 
-          if (!exactMatch) {
-            spellingSuggestion.innerHTML = `Suggested Spelling: <strong>${topSpelling.Song}</strong>`;
+          if (isFuzzy) {
+            spellingSuggestion.innerHTML = `Did you mean? <strong>${suggested.Song}</strong>`;
             spellingSuggestion.onclick = () => {
-              searchInput.value = topSpelling.Song;
-              performSearch(topSpelling.Song);
+              searchInput.value = suggested.Song;
+              performSearch(suggested.Song);
             };
-          } else {
-            spellingSuggestion.innerText = '';
-            spellingSuggestion.onclick = null;
-          }
 
-          const songMatch = songData.find(song => song.Song.toLowerCase().includes(filter));
-          const artistMatch = songData.find(song => song.Artist.toLowerCase().includes(filter));
-          if (songMatch || artistMatch) {
-            const label = songMatch ? `"${songMatch.Song}"` : `"${artistMatch.Artist}"`;
-            const suggestion = songMatch ? songMatch.Song : artistMatch.Artist;
+            const songMatch = songData.find(s => s.Song.toLowerCase().includes(suggested.Song.toLowerCase()));
+            const artistMatch = songData.find(s => s.Artist.toLowerCase().includes(suggested.Song.toLowerCase()));
 
-            songArtistSuggestion.innerHTML = `Matching Title/Artist: <strong>${label}</strong>`;
-            songArtistSuggestion.onclick = () => {
-              searchInput.value = suggestion;
-              performSearch(suggestion);
-            };
+            songTitleSuggestion.innerHTML = songMatch ? `Song match: <strong>${songMatch.Song}</strong>` : '';
+            songTitleSuggestion.onclick = songMatch ? () => {
+              searchInput.value = songMatch.Song;
+              performSearch(songMatch.Song);
+            } : null;
+
+            artistNameSuggestion.innerHTML = artistMatch ? `Artist match: <strong>${artistMatch.Artist}</strong>` : '';
+            artistNameSuggestion.onclick = artistMatch ? () => {
+              searchInput.value = artistMatch.Artist;
+              performSearch(artistMatch.Artist);
+            } : null;
           } else {
-            songArtistSuggestion.innerText = '';
-            songArtistSuggestion.onclick = null;
+            spellingSuggestion.innerText = songTitleSuggestion.innerText = artistNameSuggestion.innerText = '';
           }
         } else {
           filteredData = [];
           renderTable([]);
           spellingSuggestion.innerText = 'No results found.';
-          spellingSuggestion.onclick = null;
-          songArtistSuggestion.innerText = '';
-          songArtistSuggestion.onclick = null;
+          songTitleSuggestion.innerText = '';
+          artistNameSuggestion.innerText = '';
         }
       }
 
-      searchInput.addEventListener("input", function () {
+      searchInput.addEventListener("input", () => {
         clearTimeout(debounceTimeout);
-        debounceTimeout = setTimeout(() => {
-          performSearch(searchInput.value);
-        }, 200);
+        debounceTimeout = setTimeout(() => performSearch(searchInput.value), 200);
       });
 
       document.querySelectorAll("th").forEach(header => {
         header.addEventListener("click", function () {
-          const columnIndex = this.getAttribute("data-index");
-          sortTable(columnIndex, this);
+          const index = this.getAttribute("data-index");
+          const key = ['#', 'Song', 'Artist'][index];
+          const asc = this.getAttribute("data-sort") !== "asc";
+
+          filteredData.sort((a, b) => {
+            const valA = a[key].toLowerCase();
+            const valB = b[key].toLowerCase();
+            return asc ? valA.localeCompare(valB, undefined, { numeric: true }) : valB.localeCompare(valA, undefined, { numeric: true });
+          });
+
+          renderTable(filteredData);
+          document.querySelectorAll("th").forEach(th => th.classList.remove("sorted-asc", "sorted-desc"));
+          this.classList.add(asc ? "sorted-asc" : "sorted-desc");
+          this.setAttribute("data-sort", asc ? "asc" : "desc");
+          this.querySelector(".sort-arrow").innerText = asc ? "↓" : "↑";
         });
       });
-
-      function sortTable(index, header) {
-        const ascending = header.getAttribute("data-sort") !== "asc";
-        const key = ["#", "Song", "Artist"][index];
-
-        filteredData.sort((a, b) => {
-          const valA = a[key].toString().toLowerCase();
-          const valB = b[key].toString().toLowerCase();
-          return ascending ? valA.localeCompare(valB, undefined, {numeric: true}) : valB.localeCompare(valA, undefined, {numeric: true});
-        });
-
-        renderTable(filteredData);
-        header.setAttribute("data-sort", ascending ? "asc" : "desc");
-
-        document.querySelectorAll("th").forEach(th => {
-          th.classList.remove("sorted-asc", "sorted-desc");
-          th.querySelector(".sort-arrow").innerText = "";
-        });
-
-        header.classList.add(ascending ? "sorted-asc" : "sorted-desc");
-        header.querySelector(".sort-arrow").innerText = ascending ? "↓" : "↑";
-      }
     });
   </script>
 </body>
