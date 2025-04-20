@@ -140,23 +140,67 @@
   </div>
 
   <script>
-    const feedbackMessages = [
-      "Oops! Either that song doesn’t exist or you’ve discovered a new genre: Invisible Music.",
-      "Nada! Maybe the song is hiding.",
-      "No results, champ. Maybe it's time to invent your own lyrics?",
-      "This song must be playing in an alternate universe. Try again!",
-      "Nothing found. Maybe it’s a secret song only known by rock legends?",
-      "You either spelled it wrong, or this song is only available on a mixtape in some basement.",
-      "Nope, nothing. But on the bright side, you get to pick another banger!"
-    ];
-
     document.addEventListener("DOMContentLoaded", function () {
       const searchInput = document.getElementById("search");
       const feedbackMessage = document.getElementById("feedbackMessage");
+      const songTableBody = document.querySelector("#songTable tbody");
+      const sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
+
+      let songData = JSON.parse(localStorage.getItem("songData")) || [];
+      let fuse;
+
+      if (songData.length > 0) {
+        renderTable(songData);
+      } else {
+        fetch(sheetURL)
+          .then(res => res.json())
+          .then(data => {
+            songData = data;
+            localStorage.setItem("songData", JSON.stringify(songData));
+            renderTable(songData);
+          });
+      }
+
+      function renderTable(data) {
+        songTableBody.innerHTML = "";
+        data.forEach(row => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${row["#"]}</td><td>${row.Song}</td><td>${row.Artist}</td>`;
+          songTableBody.appendChild(tr);
+        });
+      }
+
+      function initFuse(data) {
+        fuse = new Fuse(data, {
+          keys: ['#', 'Song', 'Artist'],
+          threshold: 0.35,
+          ignoreLocation: true,
+          includeScore: true
+        });
+      }
+
+      initFuse(songData);
 
       searchInput.addEventListener("input", () => {
-        const term = searchInput.value.trim();
-        feedbackMessage.innerText = term ? feedbackMessages[Math.floor(Math.random() * feedbackMessages.length)] : "";
+        const term = searchInput.value.trim().toLowerCase();
+        feedbackMessage.innerText = "";
+
+        if (!term) {
+          renderTable(songData);
+          return;
+        }
+
+        const results = fuse.search(term);
+        if (results.length > 0) {
+          renderTable(results.map(r => r.item));
+        } else {
+          const feedbackMessages = [
+            "Oops! Either that song doesn’t exist or you’ve discovered a new genre: Invisible Music.",
+            "Nada! Maybe the song is hiding.",
+            "No results, champ. Maybe it's time to invent your own lyrics?"
+          ];
+          feedbackMessage.innerText = feedbackMessages[Math.floor(Math.random() * feedbackMessages.length)];
+        }
       });
     });
   </script>
