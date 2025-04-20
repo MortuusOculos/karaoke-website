@@ -1,308 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Searchable Song List</title>
-    <style>
-        body {
-            background: #ff007f;
-            text-align: center;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Searchable Song List</title>
+  <style>
+    body {
+      background: #ff007f;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
 
-        #search-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: #ff007f;
-            padding: 15px 0;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    #search-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #ff007f;
+      padding: 15px 0;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-        .top-row {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            max-width: 1200px;
-            margin: 0 auto;
-            align-items: center;
-        }
+    .top-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      align-items: center;
+    }
 
-        .third {
-            width: 33.33%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    .third {
+      width: 33.33%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        #logo {
-            height: 40px;
-            width: auto;
-            border: 1px solid white;
-            border-radius: 5px;
-        }
+    #logo {
+      height: 40px;
+      width: auto;
+      border: 1px solid white;
+      border-radius: 5px;
+    }
 
-        #search {
-            width: 100%;
-            max-width: 600px;
-            padding: 10px;
-            font-size: 18px;
-            border: 1px solid #ccc;
-            background: white;
-            border-radius: 5px;
-            text-align: center;
-        }
+    #search {
+      width: 100%;
+      max-width: 600px;
+      padding: 10px;
+      font-size: 18px;
+      border: 1px solid #ccc;
+      background: white;
+      border-radius: 5px;
+      text-align: center;
+    }
 
-        #suggestion {
-            margin-top: 5px;
-            font-size: 14px;
-            color: yellow;
-            text-shadow: 1px 1px black;
-            cursor: pointer;
-        }
+    .suggestion-box {
+      margin-top: 5px;
+      font-size: 14px;
+      color: yellow;
+      text-shadow: 1px 1px black;
+      cursor: pointer;
+    }
 
-        #hire-us {
-            font-size: 20px;
-            color: yellow;
-            font-weight: bold;
-            text-shadow: 2px 2px black;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-        }
+    #hire-us {
+      font-size: 20px;
+      color: yellow;
+      font-weight: bold;
+      text-shadow: 2px 2px black;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+    }
 
-        #table-container {
-            margin-top: 120px;
-        }
+    #table-container {
+      margin-top: 140px;
+    }
 
-        table {
-            width: 80%;
-            margin: auto;
-            background: #333;
-            color: white;
-            border-collapse: collapse;
-        }
+    table {
+      width: 80%;
+      margin: auto;
+      background: #333;
+      color: white;
+      border-collapse: collapse;
+    }
 
-        th, td {
-            padding: 10px;
-            border: 1px solid white;
-            cursor: pointer;
-        }
+    th, td {
+      padding: 10px;
+      border: 1px solid white;
+      cursor: pointer;
+    }
 
-        th {
-            background: black;
-            position: relative;
-        }
+    th {
+      background: black;
+      position: relative;
+    }
 
-        th:hover {
-            background: #555;
-        }
+    th:hover {
+      background: #555;
+    }
 
-        .sort-arrow {
-            display: inline-block;
-            margin-left: 8px;
-            font-size: 14px;
-            visibility: hidden;
-        }
+    .sort-arrow {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 14px;
+      visibility: hidden;
+    }
 
-        .sorted-asc .sort-arrow,
-        .sorted-desc .sort-arrow {
-            visibility: visible;
-        }
+    .sorted-asc .sort-arrow,
+    .sorted-desc .sort-arrow {
+      visibility: visible;
+    }
 
-        @media (max-width: 600px) {
-            body {
-                font-size: 16px;
-            }
+    @media (max-width: 600px) {
+      #search {
+        width: 100%;
+      }
 
-            #search {
-                width: 100%;
-            }
+      table {
+        width: 100%;
+      }
 
-            #suggestion {
-                font-size: 12px;
-            }
-
-            table {
-                width: 100%;
-            }
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+      .suggestion-box {
+        font-size: 12px;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
 <body>
-    <div id="search-container">
-        <div class="top-row">
-            <div class="third">
-                <img id="logo" src="https://raw.githubusercontent.com/MortuusOculos/karaoke-website/main/KKKpic.jpg" alt="Logo">
-            </div>
-            <div class="third">
-                <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
-            </div>
-            <div class="third">
-                <a id="hire-us" href="hire.html">Hire Us!</a>
-            </div>
-        </div>
-        <div id="suggestion"></div>
+  <div id="search-container">
+    <div class="top-row">
+      <div class="third">
+        <img id="logo" src="https://raw.githubusercontent.com/MortuusOculos/karaoke-website/main/KKKpic.jpg" alt="Logo">
+      </div>
+      <div class="third">
+        <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
+      </div>
+      <div class="third">
+        <a id="hire-us" href="hire.html">Hire Us!</a>
+      </div>
     </div>
+    <div class="suggestion-box" id="spellingSuggestion"></div>
+    <div class="suggestion-box" id="songArtistSuggestion"></div>
+  </div>
 
-    <div id="table-container">
-        <table id="songTable">
-            <thead>
-                <tr>
-                    <th data-index="0"># <span class="sort-arrow">↓</span></th>
-                    <th data-index="1">Song <span class="sort-arrow">↓</span></th>
-                    <th data-index="2">Artist <span class="sort-arrow">↓</span></th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+  <div id="table-container">
+    <table id="songTable">
+      <thead>
+        <tr>
+          <th data-index="0"># <span class="sort-arrow">↓</span></th>
+          <th data-index="1">Song <span class="sort-arrow">↓</span></th>
+          <th data-index="2">Artist <span class="sort-arrow">↓</span></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-    <script>
-        let songData = [];
-        let filteredData = [];
-        let fuse;
+  <script>
+    let songData = [];
+    let filteredData = [];
+    let fuse;
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
+    document.addEventListener("DOMContentLoaded", function () {
+      const sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
 
-            const cachedData = localStorage.getItem('songData');
-            if (cachedData) {
-                songData = JSON.parse(cachedData);
-                initSearch(songData);
-                filteredData = songData;
-                renderTable(filteredData);
-            } else {
-                fetch(sheetURL)
-                    .then(response => response.json())
-                    .then(data => {
-                        songData = data;
-                        localStorage.setItem('songData', JSON.stringify(songData));
-                        initSearch(songData);
-                        filteredData = songData;
-                        renderTable(filteredData);
-                    })
-                    .catch(error => {
-                        console.error("Error fetching data:", error);
-                    });
-            }
+      const cachedData = localStorage.getItem('songData');
+      if (cachedData) {
+        songData = JSON.parse(cachedData);
+        initFuse(songData);
+        filteredData = songData;
+        renderTable(filteredData);
+      } else {
+        fetch(sheetURL)
+          .then(response => response.json())
+          .then(data => {
+            songData = data;
+            localStorage.setItem('songData', JSON.stringify(songData));
+            initFuse(songData);
+            filteredData = songData;
+            renderTable(filteredData);
+          })
+          .catch(error => console.error("Error fetching data:", error));
+      }
 
-            function initSearch(data) {
-                fuse = new Fuse(data, {
-                    keys: ["#", "Song", "Artist"],
-                    threshold: 0.3,
-                    ignoreLocation: true,
-                    includeScore: true
-                });
-            }
-
-            function renderTable(data) {
-                const tableBody = document.querySelector("#songTable tbody");
-                tableBody.innerHTML = "";
-
-                data.forEach(row => {
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `<td>${row["#"]}</td><td>${row.Song}</td><td>${row.Artist}</td>`;
-                    tableBody.appendChild(tr);
-                });
-            }
-
-            let debounceTimeout;
-            const searchInput = document.getElementById("search");
-            const suggestionBox = document.getElementById("suggestion");
-
-            function performSearch(query) {
-                const filter = query.trim().toLowerCase();
-
-                if (!filter) {
-                    filteredData = songData;
-                    renderTable(filteredData);
-                    suggestionBox.innerText = '';
-                    return;
-                }
-
-                const results = fuse.search(filter);
-
-                if (results.length > 0) {
-                    filteredData = results.map(result => result.item);
-                    renderTable(filteredData);
-
-                    const topMatch = results[0].item;
-                    if (
-                        topMatch["#"].toString().toLowerCase() !== filter &&
-                        topMatch.Song.toLowerCase() !== filter &&
-                        topMatch.Artist.toLowerCase() !== filter
-                    ) {
-                        suggestionBox.innerHTML = `Did you mean: <strong>"${topMatch.Song}"</strong> by <strong>${topMatch.Artist}</strong>?`;
-                        suggestionBox.onclick = () => {
-                            searchInput.value = topMatch.Song;
-                            performSearch(topMatch.Song);
-                        };
-                    } else {
-                        suggestionBox.innerText = '';
-                        suggestionBox.onclick = null;
-                    }
-                } else {
-                    filteredData = [];
-                    renderTable(filteredData);
-                    suggestionBox.innerText = 'No results found.';
-                    suggestionBox.onclick = null;
-                }
-            }
-
-            searchInput.addEventListener("input", function () {
-                clearTimeout(debounceTimeout);
-                debounceTimeout = setTimeout(() => {
-                    performSearch(searchInput.value);
-                }, 200);
-            });
-
-            document.querySelectorAll("th").forEach(header => {
-                header.addEventListener("click", function () {
-                    const columnIndex = this.getAttribute("data-index");
-                    sortTable(columnIndex, this);
-                });
-            });
-
-            function sortTable(columnIndex, header) {
-                const ascending = header.getAttribute("data-sort") !== "asc";
-
-                if (columnIndex == 0) {
-                    filteredData.sort((a, b) => {
-                        const numA = parseInt(a["#"], 10);
-                        const numB = parseInt(b["#"], 10);
-                        return ascending ? numA - numB : numB - numA;
-                    });
-                } else {
-                    const key = columnIndex == 1 ? "Song" : "Artist";
-                    filteredData.sort((a, b) => {
-                        const textA = (a[key] || "").toString().trim().toLowerCase();
-                        const textB = (b[key] || "").toString().trim().toLowerCase();
-                        return ascending ? textA.localeCompare(textB) : textB.localeCompare(textA);
-                    });
-                }
-
-                renderTable(filteredData);
-                header.setAttribute("data-sort", ascending ? "asc" : "desc");
-
-                document.querySelectorAll("th").forEach(th => {
-                    th.classList.remove("sorted-asc", "sorted-desc");
-                    th.querySelector(".sort-arrow").innerText = "";
-                });
-
-                header.classList.add(ascending ? "sorted-asc" : "sorted-desc");
-                header.querySelector(".sort-arrow").innerText = ascending ? "↓" : "↑";
-            }
+      function initFuse(data) {
+        fuse = new Fuse(data, {
+          keys: ["#", "Song", "Artist"],
+          threshold: 0.3,
+          ignoreLocation: true,
+          includeScore: true
         });
-    </script>
+      }
+
+      function renderTable(data) {
+        const tbody = document.querySelector("#songTable tbody");
+        tbody.innerHTML = "";
+        data.forEach(row => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${row["#"]}</td><td>${row.Song}</td><td>${row.Artist}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      let debounceTimeout;
+      const searchInput = document.getElementById("search");
+      const spellingSuggestion = document.getElementById("spellingSuggestion");
+      const songArtistSuggestion = document.getElementById("songArtistSuggestion");
+
+      function performSearch(query) {
+        const filter = query.trim().toLowerCase();
+        if (!filter) {
+          filteredData = songData;
+          renderTable(filteredData);
+          spellingSuggestion.innerText = '';
+          songArtistSuggestion.innerText = '';
+          return;
+        }
+
+        const results = fuse.search(filter);
+
+        if (results.length > 0) {
+          filteredData = results.map(r => r.item);
+          renderTable(filteredData);
+
+          const topSpelling = results[0].item;
+          const exactMatch = topSpelling["#"].toString().toLowerCase() === filter ||
+                             topSpelling.Song.toLowerCase() === filter ||
+                             topSpelling.Artist.toLowerCase() === filter;
+
+          if (!exactMatch) {
+            spellingSuggestion.innerHTML = `Suggested Spelling: <strong>${topSpelling.Song}</strong>`;
+            spellingSuggestion.onclick = () => {
+              searchInput.value = topSpelling.Song;
+              performSearch(topSpelling.Song);
+            };
+          } else {
+            spellingSuggestion.innerText = '';
+            spellingSuggestion.onclick = null;
+          }
+
+          const songMatch = songData.find(song => song.Song.toLowerCase().includes(filter));
+          const artistMatch = songData.find(song => song.Artist.toLowerCase().includes(filter));
+          if (songMatch || artistMatch) {
+            const label = songMatch ? `"${songMatch.Song}"` : `"${artistMatch.Artist}"`;
+            const suggestion = songMatch ? songMatch.Song : artistMatch.Artist;
+
+            songArtistSuggestion.innerHTML = `Matching Title/Artist: <strong>${label}</strong>`;
+            songArtistSuggestion.onclick = () => {
+              searchInput.value = suggestion;
+              performSearch(suggestion);
+            };
+          } else {
+            songArtistSuggestion.innerText = '';
+            songArtistSuggestion.onclick = null;
+          }
+        } else {
+          filteredData = [];
+          renderTable([]);
+          spellingSuggestion.innerText = 'No results found.';
+          spellingSuggestion.onclick = null;
+          songArtistSuggestion.innerText = '';
+          songArtistSuggestion.onclick = null;
+        }
+      }
+
+      searchInput.addEventListener("input", function () {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+          performSearch(searchInput.value);
+        }, 200);
+      });
+
+      document.querySelectorAll("th").forEach(header => {
+        header.addEventListener("click", function () {
+          const columnIndex = this.getAttribute("data-index");
+          sortTable(columnIndex, this);
+        });
+      });
+
+      function sortTable(index, header) {
+        const ascending = header.getAttribute("data-sort") !== "asc";
+        const key = ["#", "Song", "Artist"][index];
+
+        filteredData.sort((a, b) => {
+          const valA = a[key].toString().toLowerCase();
+          const valB = b[key].toString().toLowerCase();
+          return ascending ? valA.localeCompare(valB, undefined, {numeric: true}) : valB.localeCompare(valA, undefined, {numeric: true});
+        });
+
+        renderTable(filteredData);
+        header.setAttribute("data-sort", ascending ? "asc" : "desc");
+
+        document.querySelectorAll("th").forEach(th => {
+          th.classList.remove("sorted-asc", "sorted-desc");
+          th.querySelector(".sort-arrow").innerText = "";
+        });
+
+        header.classList.add(ascending ? "sorted-asc" : "sorted-desc");
+        header.querySelector(".sort-arrow").innerText = ascending ? "↓" : "↑";
+      }
+    });
+  </script>
 </body>
 </html>
