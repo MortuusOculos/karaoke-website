@@ -212,83 +212,27 @@
       const spellingSuggestion = document.getElementById("spellingSuggestion");
       const songTitleSuggestion = document.getElementById("songTitleSuggestion");
       const artistNameSuggestion = document.getElementById("artistNameSuggestion");
-      let debounceTimeout;
 
       function performSearch(query) {
         const term = query.trim().toLowerCase();
         if (!term) {
           filteredData = songData;
           renderTable(filteredData);
-          spellingSuggestion.innerText = songTitleSuggestion.innerText = artistNameSuggestion.innerText = '';
           return;
         }
 
         const results = fuse.search(term);
-        const isFuzzy = results.length > 0 && results[0].score > 0.001;
-
         if (results.length > 0) {
           filteredData = results.map(r => r.item);
           renderTable(filteredData);
 
           const suggested = results[0].item;
-
-          if (isFuzzy) {
-            spellingSuggestion.innerHTML = `Did you mean? <strong>${suggested.Song}</strong>`;
-            spellingSuggestion.onclick = () => {
-              searchInput.value = suggested.Song;
-              performSearch(suggested.Song);
-            };
-
-            const songMatch = songData.find(s => s.Song.toLowerCase().includes(suggested.Song.toLowerCase()));
-            const artistMatch = songData.find(s => s.Artist.toLowerCase().includes(suggested.Song.toLowerCase()));
-
-            songTitleSuggestion.innerHTML = songMatch ? `Song match: <strong>${songMatch.Song}</strong>` : '';
-            songTitleSuggestion.onclick = songMatch ? () => {
-              searchInput.value = songMatch.Song;
-              performSearch(songMatch.Song);
-            } : null;
-
-            artistNameSuggestion.innerHTML = artistMatch ? `Artist match: <strong>${artistMatch.Artist}</strong>` : '';
-            artistNameSuggestion.onclick = artistMatch ? () => {
-              searchInput.value = artistMatch.Artist;
-              performSearch(artistMatch.Artist);
-            } : null;
-          } else {
-            spellingSuggestion.innerText = songTitleSuggestion.innerText = artistNameSuggestion.innerText = '';
-          }
-        } else {
-          filteredData = [];
-          renderTable([]);
-          spellingSuggestion.innerText = 'No results found.';
-          songTitleSuggestion.innerText = '';
-          artistNameSuggestion.innerText = '';
+          spellingSuggestion.innerHTML = `Did you mean? <strong>${suggested.Song}</strong>`;
+          artistNameSuggestion.innerHTML = suggested.Artist ? `Artist match: <strong>${suggested.Artist}</strong>` : '';
         }
       }
 
-      searchInput.addEventListener("input", () => {
-        clearTimeout(debounceTimeout);
-        debounceTimeout = setTimeout(() => performSearch(searchInput.value), 200);
-      });
-
-      document.querySelectorAll("th").forEach(header => {
-        header.addEventListener("click", function () {
-          const index = this.getAttribute("data-index");
-          const key = ['#', 'Song', 'Artist'][index];
-          const asc = this.getAttribute("data-sort") !== "asc";
-
-          filteredData.sort((a, b) => {
-            const valA = a[key].toLowerCase();
-            const valB = b[key].toLowerCase();
-            return asc ? valA.localeCompare(valB, undefined, { numeric: true }) : valB.localeCompare(valA, undefined, { numeric: true });
-          });
-
-          renderTable(filteredData);
-          document.querySelectorAll("th").forEach(th => th.classList.remove("sorted-asc", "sorted-desc"));
-          this.classList.add(asc ? "sorted-asc" : "sorted-desc");
-          this.setAttribute("data-sort", asc ? "asc" : "desc");
-          this.querySelector(".sort-arrow").innerText = asc ? "↓" : "↑";
-        });
-      });
+      searchInput.addEventListener("input", () => performSearch(searchInput.value));
     });
   </script>
 </body>
