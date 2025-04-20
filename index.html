@@ -98,18 +98,6 @@
       background: #555;
     }
 
-    .sort-arrow {
-      display: inline-block;
-      margin-left: 8px;
-      font-size: 14px;
-      visibility: hidden;
-    }
-
-    .sorted-asc .sort-arrow,
-    .sorted-desc .sort-arrow {
-      visibility: visible;
-    }
-
     @media (max-width: 600px) {
       #search {
         width: 100%;
@@ -142,9 +130,9 @@
     <table id="songTable">
       <thead>
         <tr>
-          <th data-index="0"># <span class="sort-arrow">↓</span></th>
-          <th data-index="1">Song <span class="sort-arrow">↓</span></th>
-          <th data-index="2">Artist <span class="sort-arrow">↓</span></th>
+          <th data-index="0">#</th>
+          <th data-index="1">Song</th>
+          <th data-index="2">Artist</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -152,80 +140,23 @@
   </div>
 
   <script>
-    let songData = [], filteredData = [], fuse;
+    const feedbackMessages = [
+      "Oops! Either that song doesn’t exist or you’ve discovered a new genre: Invisible Music.",
+      "Nada! Maybe the song is hiding.",
+      "No results, champ. Maybe it's time to invent your own lyrics?",
+      "This song must be playing in an alternate universe. Try again!",
+      "Nothing found. Maybe it’s a secret song only known by rock legends?",
+      "You either spelled it wrong, or this song is only available on a mixtape in some basement.",
+      "Nope, nothing. But on the bright side, you get to pick another banger!"
+    ];
 
     document.addEventListener("DOMContentLoaded", function () {
-      const sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
-      const cachedData = localStorage.getItem('songData');
-
-      if (cachedData) {
-        songData = JSON.parse(cachedData);
-        initFuse(songData);
-        filteredData = songData;
-        renderTable(filteredData);
-      } else {
-        fetch(sheetURL)
-          .then(res => res.json())
-          .then(data => {
-            songData = data;
-            localStorage.setItem('songData', JSON.stringify(songData));
-            initFuse(songData);
-            filteredData = songData;
-            renderTable(filteredData);
-          });
-      }
-
-      function initFuse(data) {
-        fuse = new Fuse(data, {
-          keys: ['#', 'Song', 'Artist'],
-          threshold: 0.35,
-          ignoreLocation: true,
-          includeScore: true
-        });
-      }
-
-      function renderTable(data) {
-        const tbody = document.querySelector("#songTable tbody");
-        tbody.innerHTML = "";
-        data.forEach(row => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${row["#"]}</td><td>${row.Song}</td><td>${row.Artist}</td>`;
-          tbody.appendChild(tr);
-        });
-      }
-
       const searchInput = document.getElementById("search");
       const feedbackMessage = document.getElementById("feedbackMessage");
-      const feedbackMessages = [
-        "That’s not on the list, mate! Try again.",
-        "Have another crack at it, legend!",
-        "Nothing found—blame the bartender?"
-      ];
-
-      function performSearch(query) {
-        const term = query.trim().toLowerCase();
-        feedbackMessage.innerText = ""; // Clear feedback message when search changes
-
-        if (!term) {
-          filteredData = songData;
-          renderTable(filteredData);
-          return;
-        }
-
-        const results = fuse.search(term);
-        if (results.length > 0) {
-          filteredData = results.map(r => r.item);
-          renderTable(filteredData);
-        } else {
-          feedbackMessage.innerText = feedbackMessages[Math.floor(Math.random() * feedbackMessages.length)];
-        }
-      }
 
       searchInput.addEventListener("input", () => {
-        performSearch(searchInput.value);
-        if (!searchInput.value.trim()) {
-          feedbackMessage.innerText = ""; // Ensure message disappears when clearing search
-        }
+        const term = searchInput.value.trim();
+        feedbackMessage.innerText = term ? feedbackMessages[Math.floor(Math.random() * feedbackMessages.length)] : "";
       });
     });
   </script>
