@@ -149,6 +149,7 @@
       let songData = JSON.parse(localStorage.getItem("songData")) || [];
       let fuse;
       let debounceTimer;
+      let feedbackIndex = 0;
 
       const feedbackMessages = [
         "Oops! Either that song doesn’t exist or you’ve discovered a new genre: Invisible Music.",
@@ -157,7 +158,30 @@
         "Looks like you’ve requested a song that exists only in your imagination!",
         "This song must be exclusive to rock gods only!",
         "You’re ahead of the times, mate—try a song that actually exists.",
-        "That track is on a secret VIP list somewhere, just not here!"
+        "That track is on a secret VIP list somewhere, just not here!",
+        "No results, but you can always hum it loudly!",
+        "That song might exist, but only if you sing it with extreme confidence.",
+        "Are you typing with your elbows? No results found!",
+        "Your request entered the Twilight Zone. Try another!",
+        "Nada! The song must be hiding!",
+        "Search failed! Maybe the song got embarrassed?",
+        "Maybe just scream the lyrics until someone recognizes it?",
+        "This song is so underground, not even the search bar can find it.",
+        "Sorry, mate, but that one isn’t on the list.",
+        "Are you searching for a ghost track? Because that ain’t here!",
+        "Nothing here… but I respect your commitment.",
+        "This song exists only in karaoke dreams!",
+        "Nothing found—blame the bartender?",
+        "Nope, but free-style rapping is always an option!",
+        "Try again, you nearly got it!",
+        "Not found! But feel free to belt out a random tune anyway!",
+        "That track took a vacation!",
+        "No results, but your enthusiasm is appreciated!",
+        "Your song request is officially classified as ‘Mystery’!",
+        "That’s a rare song, mate—try another?",
+        "You may have accidentally typed in reverse!",
+        "That song got away… try again!",
+        "Last call for finding that tune—still no luck!"
       ];
 
       if (songData.length > 0) {
@@ -181,17 +205,6 @@
         });
       }
 
-      function initFuse(data) {
-        fuse = new Fuse(data, {
-          keys: ['#', 'Song', 'Artist'],
-          threshold: 0.35,
-          ignoreLocation: true,
-          includeScore: true
-        });
-      }
-
-      initFuse(songData);
-
       function debounceSearch(callback, delay) {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(callback, delay);
@@ -211,7 +224,8 @@
           if (results.length > 0) {
             renderTable(results.map(r => r.item));
           } else {
-            feedbackMessage.innerText = feedbackMessages[Math.floor(Math.random() * feedbackMessages.length)];
+            feedbackMessage.innerText = feedbackMessages[feedbackIndex];
+            feedbackIndex = (feedbackIndex + 1) % feedbackMessages.length;
           }
         }, 300);
       });
