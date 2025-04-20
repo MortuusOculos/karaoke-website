@@ -28,18 +28,12 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
     }
     #logo {
       height: 40px;
       width: auto;
       border: 1px solid white;
       border-radius: 5px;
-    }
-    #version {
-      color: white;
-      font-size: 12px;
-      margin-top: 5px;
     }
     #search {
       width: 100%;
@@ -61,7 +55,7 @@
       text-decoration: none;
     }
     #table-container {
-      margin-top: 120px;
+      margin-top: 100px;
     }
     table {
       width: 80%;
@@ -92,9 +86,6 @@
     .sorted-desc .sort-arrow {
       visibility: visible;
     }
-    .hide {
-      display: none;
-    }
     #suggestions {
       color: white;
       margin-top: 20px;
@@ -117,7 +108,6 @@
   <div id="search-container">
     <div class="third">
       <img id="logo" src="https://raw.githubusercontent.com/MortuusOculos/karaoke-website/main/KKKpic.jpg" alt="Logo">
-      <div id="version">Version: Loading...</div>
     </div>
     <div class="third">
       <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist" />
@@ -148,29 +138,15 @@
 
     document.addEventListener("DOMContentLoaded", function () {
       const sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
-      const versionURL = "https://raw.githubusercontent.com/MortuusOculos/karaoke-website/main/version.txt";
 
-      fetch(versionURL)
-        .then(res => res.text())
-        .then(txt => document.getElementById("version").innerText = `Version: ${txt.trim()}`)
-        .catch(() => document.getElementById("version").innerText = "Version: Unknown");
-
-      const cachedData = localStorage.getItem('songData');
-      if (cachedData) {
-        songData = JSON.parse(cachedData);
-        filteredData = songData;
-        renderTable(filteredData);
-      } else {
-        fetch(sheetURL)
-          .then(response => response.json())
-          .then(data => {
-            songData = data;
-            filteredData = songData;
-            renderTable(filteredData);
-            localStorage.setItem('songData', JSON.stringify(songData));
-          })
-          .catch(error => console.error("Error fetching data:", error));
-      }
+      fetch(sheetURL)
+        .then(response => response.json())
+        .then(data => {
+          songData = data;
+          filteredData = songData;
+          renderTable(filteredData);
+        })
+        .catch(error => console.error("Error fetching data:", error));
 
       function renderTable(data) {
         const tableBody = document.querySelector("#songTable tbody");
@@ -198,8 +174,8 @@
 
           filteredData = songData.filter(row =>
             row["#"].toString().includes(rawInput) ||
-            (typeof row.Song === 'string' && row.Song.toLowerCase().includes(rawInput)) ||
-            (typeof row.Artist === 'string' && row.Artist.toLowerCase().includes(rawInput))
+            (row.Song && row.Song.toLowerCase().includes(rawInput)) ||
+            (row.Artist && row.Artist.toLowerCase().includes(rawInput))
           );
 
           if (filteredData.length === 0) {
@@ -207,21 +183,21 @@
               keys: ["Song", "Artist"],
               threshold: 0.3,
             });
-            const suggestions = fuse.search(rawInput);
+            const results = fuse.search(rawInput);
 
-            if (suggestions.length > 0) {
-              const suggestion = suggestions[0].item;
-              const suggestionText = suggestion.Song || suggestion.Artist;
-              const correctedTerm = suggestionText.toLowerCase();
+            if (results.length > 0) {
+              const suggestion = results[0].item;
+              const suggestionTerm = suggestion.Song || suggestion.Artist || "";
 
-              const songMatches = songData.filter(row =>
-                row.Song && row.Song.toLowerCase().includes(correctedTerm)
-              );
-              const artistMatches = songData.filter(row =>
-                row.Artist && row.Artist.toLowerCase().includes(correctedTerm)
+              const songMatches = songData.filter(r =>
+                r.Song && r.Song.toLowerCase().includes(suggestionTerm.toLowerCase())
               );
 
-              let suggestionHTML = `<div><strong>Did you mean?</strong> ${suggestionText}</div>`;
+              const artistMatches = songData.filter(r =>
+                r.Artist && r.Artist.toLowerCase().includes(suggestionTerm.toLowerCase())
+              );
+
+              let suggestionHTML = `<div><strong>Did you mean?</strong> ${suggestionTerm}</div>`;
 
               if (songMatches.length > 0) {
                 suggestionHTML += `<div><strong>Song match:</strong> ${songMatches[0].Song} by ${songMatches[0].Artist}</div>`;
