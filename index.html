@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Searchable Song List</title>
     <style>
-        body { 
-            background: #ff007f; 
-            text-align: center; 
-            font-family: Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
+        body {
+            background: #ff007f;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
 
         #search-container {
@@ -18,11 +18,22 @@
             top: 0;
             left: 0;
             width: 100%;
-            background: #ff007f;  
+            background: #ff007f;
             padding: 15px 0;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             z-index: 1000;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .top-row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: center;
         }
 
         .third {
@@ -50,6 +61,14 @@
             text-align: center;
         }
 
+        #suggestion {
+            margin-top: 5px;
+            font-size: 14px;
+            color: yellow;
+            text-shadow: 1px 1px black;
+            cursor: pointer;
+        }
+
         #hire-us {
             font-size: 20px;
             color: yellow;
@@ -61,7 +80,7 @@
         }
 
         #table-container {
-            margin-top: 80px;
+            margin-top: 120px;
         }
 
         table {
@@ -99,10 +118,6 @@
             visibility: visible;
         }
 
-        .hide {
-            display: none;
-        }
-
         @media (max-width: 600px) {
             body {
                 font-size: 16px;
@@ -112,8 +127,8 @@
                 width: 100%;
             }
 
-            #result-count {
-                font-size: 14px;
+            #suggestion {
+                font-size: 12px;
             }
 
             table {
@@ -121,19 +136,22 @@
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
 <body>
-
     <div id="search-container">
-        <div class="third">
-            <img id="logo" src="https://raw.githubusercontent.com/MortuusOculos/karaoke-website/main/KKKpic.jpg" alt="Logo">
+        <div class="top-row">
+            <div class="third">
+                <img id="logo" src="https://raw.githubusercontent.com/MortuusOculos/karaoke-website/main/KKKpic.jpg" alt="Logo">
+            </div>
+            <div class="third">
+                <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
+            </div>
+            <div class="third">
+                <a id="hire-us" href="hire.html">Hire Us!</a>
+            </div>
         </div>
-        <div class="third">
-            <input type="text" id="search" placeholder="Search by Song Number, Song Name, or Artist">
-        </div>
-        <div class="third">
-            <a id="hire-us" href="hire.html">Hire Us!</a>
-        </div>
+        <div id="suggestion"></div>
     </div>
 
     <div id="table-container">
@@ -152,6 +170,7 @@
     <script>
         let songData = [];
         let filteredData = [];
+        let fuse;
 
         document.addEventListener("DOMContentLoaded", function () {
             const sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
@@ -159,6 +178,7 @@
             const cachedData = localStorage.getItem('songData');
             if (cachedData) {
                 songData = JSON.parse(cachedData);
+                initSearch(songData);
                 filteredData = songData;
                 renderTable(filteredData);
             } else {
@@ -166,13 +186,23 @@
                     .then(response => response.json())
                     .then(data => {
                         songData = data;
+                        localStorage.setItem('songData', JSON.stringify(songData));
+                        initSearch(songData);
                         filteredData = songData;
                         renderTable(filteredData);
-                        localStorage.setItem('songData', JSON.stringify(songData));
                     })
                     .catch(error => {
                         console.error("Error fetching data:", error);
                     });
+            }
+
+            function initSearch(data) {
+                fuse = new Fuse(data, {
+                    keys: ["#", "Song", "Artist"],
+                    threshold: 0.3,
+                    ignoreLocation: true,
+                    includeScore: true
+                });
             }
 
             function renderTable(data) {
@@ -188,17 +218,51 @@
 
             let debounceTimeout;
             const searchInput = document.getElementById("search");
+            const suggestionBox = document.getElementById("suggestion");
+
+            function performSearch(query) {
+                const filter = query.trim().toLowerCase();
+
+                if (!filter) {
+                    filteredData = songData;
+                    renderTable(filteredData);
+                    suggestionBox.innerText = '';
+                    return;
+                }
+
+                const results = fuse.search(filter);
+
+                if (results.length > 0) {
+                    filteredData = results.map(result => result.item);
+                    renderTable(filteredData);
+
+                    const topMatch = results[0].item;
+                    if (
+                        topMatch["#"].toString().toLowerCase() !== filter &&
+                        topMatch.Song.toLowerCase() !== filter &&
+                        topMatch.Artist.toLowerCase() !== filter
+                    ) {
+                        suggestionBox.innerHTML = `Did you mean: <strong>"${topMatch.Song}"</strong> by <strong>${topMatch.Artist}</strong>?`;
+                        suggestionBox.onclick = () => {
+                            searchInput.value = topMatch.Song;
+                            performSearch(topMatch.Song);
+                        };
+                    } else {
+                        suggestionBox.innerText = '';
+                        suggestionBox.onclick = null;
+                    }
+                } else {
+                    filteredData = [];
+                    renderTable(filteredData);
+                    suggestionBox.innerText = 'No results found.';
+                    suggestionBox.onclick = null;
+                }
+            }
 
             searchInput.addEventListener("input", function () {
                 clearTimeout(debounceTimeout);
                 debounceTimeout = setTimeout(() => {
-                    const filter = searchInput.value.toLowerCase();
-                    filteredData = songData.filter(row => 
-                        row["#"].toString().includes(filter) || 
-                        (typeof row.Song === 'string' && row.Song.toLowerCase().includes(filter)) || 
-                        (typeof row.Artist === 'string' && row.Artist.toLowerCase().includes(filter))
-                    );
-                    renderTable(filteredData);
+                    performSearch(searchInput.value);
                 }, 200);
             });
 
@@ -219,9 +283,10 @@
                         return ascending ? numA - numB : numB - numA;
                     });
                 } else {
+                    const key = columnIndex == 1 ? "Song" : "Artist";
                     filteredData.sort((a, b) => {
-                        const textA = Object.values(a)[columnIndex].toString().trim().toLowerCase();
-                        const textB = Object.values(b)[columnIndex].toString().trim().toLowerCase();
+                        const textA = (a[key] || "").toString().trim().toLowerCase();
+                        const textB = (b[key] || "").toString().trim().toLowerCase();
                         return ascending ? textA.localeCompare(textB) : textB.localeCompare(textA);
                     });
                 }
@@ -239,6 +304,5 @@
             }
         });
     </script>
-
 </body>
 </html>
