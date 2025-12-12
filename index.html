@@ -146,6 +146,16 @@
       const songTableBody = document.querySelector("#songTable tbody");
       const sheetURL = "https://script.google.com/macros/s/AKfycbz-D_VuYwRgp6x4NC4rGwq1SJBru-qN2s1ZeZ2h_KvP4-lvXZ7k79MUSoV1mPoQFteu/exec";
 
+      // ⭐ CACHE EXPIRY SYSTEM — auto refresh every 30 minutes
+      const CACHE_MINUTES = 30;
+      const last = parseInt(localStorage.getItem("songDataTimestamp") || "0");
+      const now = Date.now();
+      const minutesSince = (now - last) / 1000 / 60;
+
+      if (minutesSince >= CACHE_MINUTES) {
+        localStorage.removeItem("songData");
+      }
+
       let songData = JSON.parse(localStorage.getItem("songData")) || [];
       let fuse;
       let debounceTimer;
@@ -188,6 +198,10 @@
           .then(data => {
             songData = data;
             localStorage.setItem("songData", JSON.stringify(songData));
+
+            // store timestamp
+            localStorage.setItem("songDataTimestamp", Date.now().toString());
+
             renderTable(songData);
             initializeFuse();
           });
